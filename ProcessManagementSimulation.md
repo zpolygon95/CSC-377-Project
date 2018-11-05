@@ -1,6 +1,6 @@
 # Process Management Simulation #
 
-Members: Zachary Polikarpus, Jordan VanDusen
+Members: Zachary Polikarpus, Jordan VanDusen, Nickxit Bhardwaj
 
 ## Tasks ##
 
