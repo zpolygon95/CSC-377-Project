@@ -18,8 +18,9 @@ typedef struct
     int runt;
 } process_t;
 
-int mgrHandleInput(int input)
+int mgrHandleInput(char input)
 {
+    // TODO: handle input
     return 0;
 }
 
