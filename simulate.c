@@ -62,7 +62,7 @@ int main(int argc, char * const argv[])
         fprintf(stderr, "manager: starting...\n");
         while(status)
         {
-            error = read(pipefd[1], *in, 1);
+            error = read(pipefd[1], &in, 1);
             switch (error) {
                 case -1:
                     perror("manager: read() failed");
@@ -82,7 +82,7 @@ int main(int argc, char * const argv[])
         int in;
         while ((in = getchar()) != EOF)
         {
-            write(pipefd[0], *in, 1);
+            write(pipefd[0], &in, 1);
             sleep(SLEEPY_TIME);
         }
     }
