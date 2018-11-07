@@ -48,6 +48,25 @@ int main(int argc, char const *argv[])
     else if (pmanager == 0)
     {
         // manager process
+        char in;
+        int error;
+        int status = 1;
+        fprintf(stderr, "manager: starting...\n");
+        while(status)
+        {
+            error = read(pipefd[1], *in, 1);
+            switch (error) {
+                case -1:
+                    perror("manager: read() failed");
+                case 0:
+                    status = 0;
+                    break;
+                default:
+                    status = mgrHandleInput(in);
+                    break;
+            }
+        }
+        fprintf(stderr, "manager: done\n", );
     }
     else
     {
