@@ -24,6 +24,11 @@ int mgrHandleInput(char input)
     return 0;
 }
 
+void printReport()
+{
+    // TODO: print report
+}
+
 int main(int argc, char const *argv[])
 {
     while ((opt = getopt(argc, argv, "f")) != -1)
