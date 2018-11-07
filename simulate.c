@@ -30,8 +30,9 @@ void printReport()
     // TODO: print report
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char * const argv[])
 {
+    int opt;
     while ((opt = getopt(argc, argv, "f")) != -1)
     {
         switch (opt)
