@@ -77,11 +77,13 @@ int main(int argc, char * const argv[])
     {
         // commander process
         int in;
+        fprintf(stderr, "commander: starting...\n");
         while ((in = getchar()) != EOF)
         {
             write(pipefd[0], &in, 1);
             sleep(SLEEPY_TIME);
         }
+        fprintf(stderr, "commander: done\n");
     }
 
     exit(EXIT_SUCCESS);
