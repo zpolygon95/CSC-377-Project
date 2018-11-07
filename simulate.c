@@ -39,9 +39,6 @@ int main(int argc, char * const argv[])
         {
             // "fast" flag
             case 'f': SLEEPY_TIME = 0;
-            default:
-                fprintf(stderr, "Usage: %s [-f]\n", argv[0]);
-                exit(EXIT_FAILURE);
         }
     }
     // commander process
