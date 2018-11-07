@@ -74,7 +74,7 @@ int main(int argc, char * const argv[])
                     break;
             }
         }
-        fprintf(stderr, "manager: done\n", );
+        fprintf(stderr, "manager: done\n");
     }
     else
     {
