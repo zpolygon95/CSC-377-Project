@@ -69,8 +69,8 @@ Simulate a process management system
             + [ ] set run time to 0
             + [ ] program array and integer copied from parent
             + [ ] priority same as parent
-            + [ ] PC of new process 1 + [ ] parent PC
-            + [ ] PC of parent process set to n + [ ] parent PC
+            + [ ] PC of new process 1 + parent PC
+            + [ ] PC of parent process set to n + parent PC
             + [ ] new process queued in ready
         + [ ] R filename: replace running process image
             + [ ] program array overwritten by code in filename
