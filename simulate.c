@@ -19,6 +19,23 @@ typedef struct
     int runt;
 } process_t;
 
+// TODO: implemenent data structures
+
+void parse_files(char *)
+{
+    // TODO
+}
+
+void tick()
+{
+    // TODO
+}
+
+void unblock()
+{
+    // TODO
+}
+
 int mgrHandleInput(char input)
 {
     // TODO: handle input
