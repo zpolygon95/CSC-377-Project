@@ -21,7 +21,7 @@ typedef struct
 
 // TODO: implemenent data structures
 
-void parse_files(char *)
+void parse_files(char *files)
 {
     // TODO
 }
