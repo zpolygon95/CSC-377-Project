@@ -26,18 +26,18 @@ Simulate a process management system
             + [ ] integer value (register for running program)
             + [ ] time slice?
             + [ ] number of time units used in current slice?
-        + [ ] PCBTable: one entry for every process that hasn't finished yet
-            + [ ] process id
-            + [ ] parent process id
-            + [ ] pointer to program counter value (initially 0)
-            + [ ] integer value
-            + [ ] priority
-            + [ ] state
-            + [ ] start time
-            + [ ] run time (time used so far)
-        + [ ] ReadyState: stores all simulated process that are ready to run
-        + [ ] BlockedState: stores all simulated process that are blocked
-        + [ ] RunningState: stores PCBTable index of currently running process
+        + [x] PCBTable: one entry for every process that hasn't finished yet
+            + [x] process id
+            + [x] parent process id
+            + [x] pointer to program counter value (initially 0)
+            + [x] integer value
+            + [x] priority
+            + [x] state
+            + [x] start time
+            + [x] run time (time used so far)
+        + [x] ReadyState: stores all simulated process that are ready to run
+        + [x] BlockedState: stores all simulated process that are blocked
+        + [x] RunningState: stores PCBTable index of currently running process
     + [ ] Processing input commands
         + [x] Get commands from pipe
             + [ ] Q: tick

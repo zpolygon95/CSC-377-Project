@@ -40,6 +40,11 @@ typedef struct
 } process_t;
 
 map<string, vector<instruction_t>> files;
+vector<process_t> PCBTable;
+vector<int> ReadyState;
+vector<int> BlockedState;
+int RunningState;
+
 int pipefd[2];
 int SLEEPY_TIME = 1;
 int current_time = 0;
