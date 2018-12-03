@@ -8,147 +8,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <deque>
 
 using namespace std;
-
-class instruction_t {
-public:
-    char opcode;
-    int arg_int;
-    string arg_string;
-
-    instruction_t (string line)
-    {
-        opcode = line[0];
-        arg_int =
-            (opcode == "R" || line.size() <= 2) ? 0 : stoi(line.substr(2));
-        arg_string =
-            (opcode != "R" || line.size() <= 2) ? "" : line.substr(2);
-    }
-};
-
-class CPU
-{
-public:
-    int current_time = 0;
-    vector<process_t> PCBTable;
-    deque<int> ReadyState;
-    deque<int> BlockedState;
-    int RunningState;
-
-    process_t get_proc_by_id(int pid)
-    {
-        for (i = 0; i < PCBTable.size(); i++)
-            if (PCBTable[i].pid == pid) return PCBTable[i];
-        return NULL;
-    }
-
-    void manage_proc(process_t p)
-    {
-        if (++p.slice >= (1 << p.priority))
-        {
-            if (p.priority < 3) p.priority++;
-            park_proc();
-        }
-    }
-
-    void tick()
-    {
-        // get next instruction
-        rproc = get_proc_by_id(RunningState);
-        instruction_t inst = files[rproc.file][rproc.pc];
-        // evaluate instruction
-        switch(inst.opcode)
-        {
-            case 'S':
-                //set
-                rproc.value = inst.arg_int
-                manage_proc(rproc);
-                break;
-            case 'A':
-                // add
-                rproc.value += inst.arg_int;
-                manage_proc(rproc);
-                break;
-            case 'D':
-                // decrease
-                rproc.value -= inst.arg_int;
-                manage_proc(rproc);
-                break;
-            case 'B':
-                block()
-                break;
-            case 'E':
-                // end
-                vector<process_t>::iterator index = PCBTable.begin();
-                int i;
-                for (i = 0; i < PCBTable.size(); i++)
-                    if (PCBTable[i].pid == rproc.pid) break;
-                index += i;
-                PCBTable.erase(index);
-                break;
-            case 'F':
-                // fork
-                child = fork(rproc, inst.arg_int, current_time);
-                PCBTable.push_back(child);
-                ReadyState.push_back(child.pid);
-                manage_proc(rproc);
-                break;
-            case 'R':
-                // replace
-                rproc.file = inst.arg_string;
-                rproc.pc = 0;
-                manage_proc();
-                break;
-            default:
-                // SOMe horrible error
-        }
-        current_time++;
-    }
-
-    void load_proc()
-    {
-        rproc = ReadyState.pop_front();
-        rproc.slice = 0;
-        rproc.state = RUNNING;
-    }
-
-    void park_proc()
-    {
-        rproc = get_proc_by_id(RunningState);
-        rproc.state = READY;
-        ReadyState.push_back(rproc.pid);
-        load_proc();
-    }
-
-    void block()
-    {
-        rproc = get_proc_by_id(RunningState);
-        rproc.state = BLOCKED;
-        if (rproc.priority > 0) rproc.priority--;
-        BlockedState.push_back(rproc.pid);
-        load_proc();
-    }
-
-    void unblock()
-    {
-        bproc = BlockedState.pop_front();
-        bproc.state = READY;
-        ReadyState.push_back(bproc.pid);
-    }
-
-    void print_current_state()
-    {
-        // TODO
-    }
-
-    CPU(string init)
-    {
-        process_t init_proc = make_proc(init);
-        PCBTable.insert(init_proc);
-        RunningState = init_proc.pid;
-    }
-}
 
 typedef struct
 {
@@ -167,6 +29,8 @@ typedef struct
 #define RUNNING 2
 #define READY 1
 #define BLOCKED 0
+
+int next_pid = 0;
 
 process_t make_proc(string file, int ppid = -1, int cpu_time = 0)
 {
@@ -195,10 +59,153 @@ process_t fork_proc(process_t parent, int n, int cpu_time)
     out.slice = 0;
 }
 
-map<string, vector<instruction_t>> files;
-CPU cpu;
+class instruction_t {
+public:
+    char opcode;
+    int arg_int;
+    string arg_string;
 
-int next_pid = 0;
+    instruction_t (string line)
+    {
+        opcode = line[0];
+        arg_int =
+            (opcode == 'R' || line.size() <= 2) ? 0 : stoi(line.substr(2));
+        arg_string =
+            (opcode != 'R' || line.size() <= 2) ? "" : line.substr(2);
+    }
+};
+
+map<string, vector<instruction_t>> files;
+
+class CPU
+{
+public:
+    int current_time = 0;
+    vector<process_t> PCBTable;
+    deque<int> ReadyState;
+    deque<int> BlockedState;
+    int RunningState;
+
+    process_t get_proc_by_id(int pid)
+    {
+        for (int i = 0; i < PCBTable.size(); i++)
+            if (PCBTable[i].pid == pid) return PCBTable[i];
+        // raise(Exception());
+    }
+
+    void manage_proc(process_t p)
+    {
+        if (++p.slice >= (1 << p.priority))
+        {
+            if (p.priority < 3) p.priority++;
+            park_proc();
+        }
+    }
+
+    void tick()
+    {
+        // get next instruction
+        process_t rproc = get_proc_by_id(RunningState);
+        instruction_t inst = files[rproc.file][rproc.pc];
+        vector<process_t>::iterator index;
+        process_t child;
+        int i;
+        // evaluate instruction
+        switch(inst.opcode)
+        {
+            case 'S':
+                //set
+                rproc.value = inst.arg_int;
+                manage_proc(rproc);
+                break;
+            case 'A':
+                // add
+                rproc.value += inst.arg_int;
+                manage_proc(rproc);
+                break;
+            case 'D':
+                // decrease
+                rproc.value -= inst.arg_int;
+                manage_proc(rproc);
+                break;
+            case 'B':
+                block();
+                break;
+            case 'E':
+                // end
+                index = PCBTable.begin();
+                for (i = 0; i < PCBTable.size(); i++)
+                    if (PCBTable[i].pid == rproc.pid) break;
+                index += i;
+                PCBTable.erase(index);
+                break;
+            case 'F':
+                // fork
+                child = fork_proc(rproc, inst.arg_int, current_time);
+                PCBTable.push_back(child);
+                ReadyState.push_back(child.pid);
+                manage_proc(rproc);
+                break;
+            case 'R':
+                // replace
+                rproc.file = inst.arg_string;
+                rproc.pc = 0;
+                manage_proc(rproc);
+                break;
+            default:
+                // SOMe horrible error
+                break;
+        }
+        current_time++;
+    }
+
+    void load_proc()
+    {
+        process_t rproc = get_proc_by_id(ReadyState.front());
+        ReadyState.pop_front();
+        rproc.slice = 0;
+        rproc.state = RUNNING;
+    }
+
+    void park_proc()
+    {
+        process_t rproc = get_proc_by_id(RunningState);
+        rproc.state = READY;
+        ReadyState.push_back(rproc.pid);
+        load_proc();
+    }
+
+    void block()
+    {
+        process_t rproc = get_proc_by_id(RunningState);
+        rproc.state = BLOCKED;
+        if (rproc.priority > 0) rproc.priority--;
+        BlockedState.push_back(rproc.pid);
+        load_proc();
+    }
+
+    void unblock()
+    {
+        process_t bproc = get_proc_by_id(BlockedState.front());
+        BlockedState.pop_front();
+        bproc.state = READY;
+        ReadyState.push_back(bproc.pid);
+    }
+
+    void print_current_state()
+    {
+        // TODO
+    }
+
+    CPU(string init)
+    {
+        process_t init_proc = make_proc(init);
+        PCBTable.push_back(init_proc);
+        RunningState = init_proc.pid;
+    }
+};
+
+CPU *cpu = nullptr;
 int pipefd[2];
 int SLEEPY_TIME = 1;
 
@@ -218,7 +225,7 @@ void parse_files(string file)
             files.insert(pair<string, vector<instruction_t>>(file, instructions));
         for (int i = 0; i < instructions.size(); i++)
         {
-            if (instructions[i].opcode == "R")
+            if (instructions[i].opcode == 'R')
             {
                 string nextpath = instructions[i].arg_string;
                 parse_files(nextpath);
@@ -227,16 +234,21 @@ void parse_files(string file)
     }
 }
 
+void printReport()
+{
+    // TODO: print report
+}
+
 int mgrHandleInput(char input)
 {
     // TODO: handle input
     int out = 1;
     switch (input) {
         case 'Q':
-            cpu.tick();
+            cpu->tick();
             return 1;
         case 'U':
-            cpu.unblock();
+            cpu->unblock();
             return 1;
         case 'T':
             out = 0;
@@ -246,11 +258,6 @@ int mgrHandleInput(char input)
         default:
             return 0;
     }
-}
-
-void printReport()
-{
-    // TODO: print report
 }
 
 int main(int argc, char const *argv[]) {
