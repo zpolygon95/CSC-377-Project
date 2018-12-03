@@ -20,12 +20,6 @@ Simulate a process management system
         + [ ] context switching
     + [ ] Data structures
         + [x] Time: Integer intialized to 0
-        + [ ] CPU: Used to simulate execution of running process
-            + [ ] Pointer to program array
-            + [ ] Current program counter value
-            + [ ] integer value (register for running program)
-            + [ ] time slice?
-            + [ ] number of time units used in current slice?
         + [x] PCBTable: one entry for every process that hasn't finished yet
             + [x] process id
             + [x] parent process id

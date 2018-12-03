@@ -27,27 +27,105 @@ public:
     }
 };
 
+class CPU
+{
+public:
+    int current_time = 0;
+    vector<process_t> PCBTable;
+    deque<int> ReadyState;
+    deque<int> BlockedState;
+    int RunningState;
+
+    process_t get_proc_by_id(int pid)
+    {
+        // TODO
+    }
+
+    void tick()
+    {
+        // TODO
+        current_time++;
+    }
+
+    void load_proc()
+    {
+        rproc = ReadyState.pop_front();
+        rproc.state = RUNNING;
+    }
+
+    void park_proc()
+    {
+        rproc = get_proc_by_id(RunningState);
+        rproc.state = READY;
+        ReadyState.push_back(rproc.pid);
+        load_proc();
+    }
+
+    void block()
+    {
+        rproc = get_proc_by_id(RunningState);
+        rproc.state = BLOCKED;
+        BlockedState.push_back(rproc.pid);
+        load_proc();
+    }
+
+    void unblock()
+    {
+        bproc = BlockedState.pop_front();
+        bproc.state = READY;
+        ReadyState.push_back(bproc.pid);
+    }
+
+    void print_current_state()
+    {
+        // TODO
+    }
+
+    CPU(string init)
+    {
+        process_t init_proc = make_proc(init);
+        PCBTable.insert(init_proc);
+        RunningState = init_proc.pid;
+    }
+}
+
 typedef struct
 {
-    int pid;
-    int ppid;
-    int pc;
-    int value;
-    int priority;
-    int state;
-    int startt;
-    int runt;
+    int pid;      // process id
+    int ppid;     // parent pid
+    int pc;       // index into the currently running file
+    string file;  // file the program is currently running
+    int value;    // value of the program's register
+    int priority; // quantum size = 1 << priority
+    int state;    // 2 for running, 1 for ready, 0 for blocked
+    int startt;   // value of current_time at which the process was spawned
+    int runt;     // total run time in ticks
+    int slice;    // stores the number of ticks used of the current quantum
 } process_t;
 
-map<string, vector<instruction_t>> files;
-vector<process_t> PCBTable;
-vector<int> ReadyState;
-vector<int> BlockedState;
-int RunningState;
+#define RUNNING 2
+#define READY 1
+#define BLOCKED 0
 
+process_t make_proc(string file, int ppid = -1, int cpu_time = 0)
+{
+    process_t out;
+    out.pid = next_pid;
+    out.ppid = ppid;
+    out.pc = 0;
+    out.file = file;
+    out.state = READY;
+    out.startt = cpu_time;
+    out.runt = 0;
+    out.slice = 0;
+}
+
+map<string, vector<instruction_t>> files;
+CPU cpu;
+
+int next_pid = 0;
 int pipefd[2];
 int SLEEPY_TIME = 1;
-int current_time = 0;
 
 void parse_files(string file)
 {
@@ -74,26 +152,16 @@ void parse_files(string file)
     }
 }
 
-void tick()
-{
-    // TODO
-}
-
-void unblock()
-{
-    // TODO
-}
-
 int mgrHandleInput(char input)
 {
     // TODO: handle input
     int out = 1;
     switch (input) {
         case 'Q':
-            tick();
+            cpu.tick();
             return 1;
         case 'U':
-            unblock();
+            cpu.unblock();
             return 1;
         case 'T':
             out = 0;
