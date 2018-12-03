@@ -98,15 +98,6 @@ int main(int argc, char const *argv[]) {
     string path(argv[1]);
     parse_files(path);
     map<string, vector<instruction_t>>::iterator it;
-    for(it = files.begin(); it != files.end(); it++)
-    {
-        cout << it->first << " => " << endl;
-        for (int i = 0; i < it->second.size(); i++)
-        {
-            cout << "  " << it->second[i].opcode << " " << it->second[i].arg_int << "|" << it->second[i].arg_string << endl;
-        }
-    }
-
     // commander process
     pipe(pipefd);
     // spawn process manager
