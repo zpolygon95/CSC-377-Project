@@ -13,7 +13,7 @@ using namespace std;
 
 class instruction_t {
 public:
-    string opcode;
+    char opcode;
     int arg_int;
     string arg_string;
 
@@ -38,18 +38,78 @@ public:
 
     process_t get_proc_by_id(int pid)
     {
-        // TODO
+        for (i = 0; i < PCBTable.size(); i++)
+            if (PCBTable[i].pid == pid) return PCBTable[i];
+        return NULL;
+    }
+
+    void manage_proc(process_t p)
+    {
+        if (++p.slice >= (1 << p.priority))
+        {
+            if (p.priority < 3) p.priority++;
+            park_proc();
+        }
     }
 
     void tick()
     {
-        // TODO
+        // get next instruction
+        rproc = get_proc_by_id(RunningState);
+        instruction_t inst = files[rproc.file][rproc.pc];
+        // evaluate instruction
+        switch(inst.opcode)
+        {
+            case 'S':
+                //set
+                rproc.value = inst.arg_int
+                manage_proc(rproc);
+                break;
+            case 'A':
+                // add
+                rproc.value += inst.arg_int;
+                manage_proc(rproc);
+                break;
+            case 'D':
+                // decrease
+                rproc.value -= inst.arg_int;
+                manage_proc(rproc);
+                break;
+            case 'B':
+                block()
+                break;
+            case 'E':
+                // end
+                vector<process_t>::iterator index = PCBTable.begin();
+                int i;
+                for (i = 0; i < PCBTable.size(); i++)
+                    if (PCBTable[i].pid == rproc.pid) break;
+                index += i;
+                PCBTable.erase(index);
+                break;
+            case 'F':
+                // fork
+                child = fork(rproc, inst.arg_int, current_time);
+                PCBTable.push_back(child);
+                ReadyState.push_back(child.pid);
+                manage_proc(rproc);
+                break;
+            case 'R':
+                // replace
+                rproc.file = inst.arg_string;
+                rproc.pc = 0;
+                manage_proc();
+                break;
+            default:
+                // SOMe horrible error
+        }
         current_time++;
     }
 
     void load_proc()
     {
         rproc = ReadyState.pop_front();
+        rproc.slice = 0;
         rproc.state = RUNNING;
     }
 
@@ -65,6 +125,7 @@ public:
     {
         rproc = get_proc_by_id(RunningState);
         rproc.state = BLOCKED;
+        if (rproc.priority > 0) rproc.priority--;
         BlockedState.push_back(rproc.pid);
         load_proc();
     }
@@ -110,10 +171,24 @@ typedef struct
 process_t make_proc(string file, int ppid = -1, int cpu_time = 0)
 {
     process_t out;
-    out.pid = next_pid;
+    out.pid = next_pid++;
     out.ppid = ppid;
     out.pc = 0;
     out.file = file;
+    out.state = READY;
+    out.startt = cpu_time;
+    out.runt = 0;
+    out.slice = 0;
+}
+
+process_t fork_proc(process_t parent, int n, int cpu_time)
+{
+    process_t out;
+    out.pid = next_pid++;
+    out.ppid = parent.pid;
+    out.pc = parent.pc + 1;
+    parent.pc += n + 1;
+    out.file = parent.file;
     out.state = READY;
     out.startt = cpu_time;
     out.runt = 0;
