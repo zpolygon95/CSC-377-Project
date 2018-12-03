@@ -1,9 +1,13 @@
 SHELL = /bin/bash
 
-bin/simulate: simulate.c
+bin/simulate: simulate.cpp
 	if [[ ! -d bin ]]; then mkdir bin; fi
-	gcc simulate.c -o bin/simulate
+	g++ simulate.cpp -o bin/simulate
 
 .PHONY: clean
 clean:
 	rm -rf bin
+
+.PHONY: run
+run: bin/simulate
+	bin/simulate programs/file_0
