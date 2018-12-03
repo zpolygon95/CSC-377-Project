@@ -42,6 +42,7 @@ typedef struct
 map<string, vector<instruction_t>> files;
 int pipefd[2];
 int SLEEPY_TIME = 1;
+int current_time = 0;
 
 void parse_files(string file)
 {
@@ -81,7 +82,22 @@ void unblock()
 int mgrHandleInput(char input)
 {
     // TODO: handle input
-    return 0;
+    int out = 1;
+    switch (input) {
+        case 'Q':
+            tick();
+            return 1;
+        case 'U':
+            unblock();
+            return 1;
+        case 'T':
+            out = 0;
+        case 'P':
+            printReport();
+            return out;
+        default:
+            return 0;
+    }
 }
 
 void printReport()

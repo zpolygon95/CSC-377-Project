@@ -19,7 +19,7 @@ Simulate a process management system
         + [ ] scheduling
         + [ ] context switching
     + [ ] Data structures
-        + [ ] Time: Integer intialized to 0
+        + [x] Time: Integer intialized to 0
         + [ ] CPU: Used to simulate execution of running process
             + [ ] Pointer to program array
             + [ ] Current program counter value
@@ -39,7 +39,7 @@ Simulate a process management system
         + [ ] BlockedState: stores all simulated process that are blocked
         + [ ] RunningState: stores PCBTable index of currently running process
     + [ ] Processing input commands
-        + [ ] Get commands from pipe
+        + [x] Get commands from pipe
             + [ ] Q: tick
                 + [ ] Execute next instruction of currently running process
                 + [ ] Increment PC (except for F & R instructions)
@@ -47,9 +47,9 @@ Simulate a process management system
                 + [ ] Perform scheduling
             + [ ] U: Move first process in "blocked" queue to "ready"
             + [ ] P: spawn new reporter process
-            + [ ] T: terminate
-                + [ ] Spawn reporter process
-                + [ ] terminate
+            + [x] T: terminate
+                + [x] Spawn reporter process
+                + [x] terminate
             + [ ] Ensure only one reporter process is running
     + [ ] Executing simulated processes
         + [ ] S n, A n, D n: update value stored in CPU (Set, Add, Subtract)
