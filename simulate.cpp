@@ -241,7 +241,6 @@ void printReport()
 
 int mgrHandleInput(char input)
 {
-    // TODO: handle input
     int out = 1;
     switch (input) {
         case 'Q':
