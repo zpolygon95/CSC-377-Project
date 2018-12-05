@@ -134,6 +134,7 @@ public:
             case 'B':
                 block();
                 break;
+            default:
             case 'E':
                 // end
                 index = PCBTable.begin();
@@ -154,9 +155,6 @@ public:
                 rproc->file = inst.arg_string;
                 rproc->pc = 0;
                 manage_proc(rproc);
-                break;
-            default:
-                // SOMe horrible error
                 break;
         }
         current_time++;
