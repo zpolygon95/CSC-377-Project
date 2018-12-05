@@ -52,7 +52,7 @@ process_t fork_proc(process_t *parent, int n, int cpu_time)
     out.pid = next_pid++;
     out.ppid = parent->pid;
     out.pc = parent->pc + 1;
-    parent->pc += n + 1;
+    parent->pc += n;
     out.file = parent->file;
     out.state = READY;
     out.startt = cpu_time;
