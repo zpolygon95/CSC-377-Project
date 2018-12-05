@@ -39,6 +39,8 @@ process_t make_proc(string file, int ppid = -1, int cpu_time = 0)
     out.ppid = ppid;
     out.pc = 0;
     out.file = file;
+    out.value = 0;
+    out.priority = 0;
     out.state = READY;
     out.startt = cpu_time;
     out.runt = 0;
@@ -54,6 +56,8 @@ process_t fork_proc(process_t *parent, int n, int cpu_time)
     out.pc = parent->pc + 1;
     parent->pc += n;
     out.file = parent->file;
+    out.value = parent->value;
+    out.priority = parent->priority;
     out.state = READY;
     out.startt = cpu_time;
     out.runt = 0;
