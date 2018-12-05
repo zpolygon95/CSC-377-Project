@@ -43,6 +43,7 @@ process_t make_proc(string file, int ppid = -1, int cpu_time = 0)
     out.startt = cpu_time;
     out.runt = 0;
     out.slice = 0;
+    return out;
 }
 
 process_t fork_proc(process_t parent, int n, int cpu_time)
@@ -57,6 +58,7 @@ process_t fork_proc(process_t parent, int n, int cpu_time)
     out.startt = cpu_time;
     out.runt = 0;
     out.slice = 0;
+    return out;
 }
 
 class instruction_t {
@@ -267,7 +269,6 @@ int main(int argc, char const *argv[]) {
     bool fast = (argc > 2) && (string(argv[2]) == "-f");
     string path(argv[1]);
     parse_files(path);
-    map<string, vector<instruction_t>>::iterator it;
     // commander process
     pipe(pipefd);
     // spawn process manager
