@@ -266,6 +266,7 @@ int main(int argc, char const *argv[]) {
         return 1;
     }
     bool fast = (argc > 2) && (string(argv[2]) == "-f");
+    SLEEPY_TIME = fast? 0:1;
     string path(argv[1]);
     parse_files(path);
     cpu = new CPU(path);
