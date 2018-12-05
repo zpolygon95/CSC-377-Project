@@ -256,7 +256,7 @@ int mgrHandleInput(char input)
             printReport();
             return out;
         default:
-            return 0;
+            return 1;
     }
 }
 
