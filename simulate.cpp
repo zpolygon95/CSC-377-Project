@@ -46,14 +46,14 @@ process_t make_proc(string file, int ppid = -1, int cpu_time = 0)
     return out;
 }
 
-process_t fork_proc(process_t parent, int n, int cpu_time)
+process_t fork_proc(process_t *parent, int n, int cpu_time)
 {
     process_t out;
     out.pid = next_pid++;
-    out.ppid = parent.pid;
-    out.pc = parent.pc + 1;
-    parent.pc += n + 1;
-    out.file = parent.file;
+    out.ppid = parent->pid;
+    out.pc = parent->pc + 1;
+    parent->pc += n + 1;
+    out.file = parent->file;
     out.state = READY;
     out.startt = cpu_time;
     out.runt = 0;
@@ -88,18 +88,18 @@ public:
     deque<int> BlockedState;
     int RunningState;
 
-    process_t get_proc_by_id(int pid)
+    process_t *get_proc_by_id(int pid)
     {
         for (int i = 0; i < PCBTable.size(); i++)
-            if (PCBTable[i].pid == pid) return PCBTable[i];
+            if (PCBTable[i].pid == pid) return &PCBTable[i];
         // raise(Exception());
     }
 
-    void manage_proc(process_t p)
+    void manage_proc(process_t *p)
     {
-        if (++p.slice >= (1 << p.priority))
+        if (++p->slice >= (1 << p->priority))
         {
-            if (p.priority < 3) p.priority++;
+            if (p->priority < 3) p->priority++;
             park_proc();
         }
     }
@@ -107,27 +107,28 @@ public:
     void tick()
     {
         // get next instruction
-        process_t rproc = get_proc_by_id(RunningState);
-        instruction_t inst = files[rproc.file][rproc.pc];
+        process_t *rproc = get_proc_by_id(RunningState);
+        instruction_t inst = files[rproc->file][rproc->pc++];
         vector<process_t>::iterator index;
         process_t child;
         int i;
         // evaluate instruction
+        cout << "tick: " << inst.opcode << endl;
         switch(inst.opcode)
         {
             case 'S':
                 //set
-                rproc.value = inst.arg_int;
+                rproc->value = inst.arg_int;
                 manage_proc(rproc);
                 break;
             case 'A':
                 // add
-                rproc.value += inst.arg_int;
+                rproc->value += inst.arg_int;
                 manage_proc(rproc);
                 break;
             case 'D':
                 // decrease
-                rproc.value -= inst.arg_int;
+                rproc->value -= inst.arg_int;
                 manage_proc(rproc);
                 break;
             case 'B':
@@ -137,7 +138,7 @@ public:
                 // end
                 index = PCBTable.begin();
                 for (i = 0; i < PCBTable.size(); i++)
-                    if (PCBTable[i].pid == rproc.pid) break;
+                    if (PCBTable[i].pid == rproc->pid) break;
                 index += i;
                 PCBTable.erase(index);
                 break;
@@ -150,8 +151,8 @@ public:
                 break;
             case 'R':
                 // replace
-                rproc.file = inst.arg_string;
-                rproc.pc = 0;
+                rproc->file = inst.arg_string;
+                rproc->pc = 0;
                 manage_proc(rproc);
                 break;
             default:
@@ -163,35 +164,35 @@ public:
 
     void load_proc()
     {
-        process_t rproc = get_proc_by_id(ReadyState.front());
+        process_t *rproc = get_proc_by_id(ReadyState.front());
         ReadyState.pop_front();
-        rproc.slice = 0;
-        rproc.state = RUNNING;
+        rproc->slice = 0;
+        rproc->state = RUNNING;
     }
 
     void park_proc()
     {
-        process_t rproc = get_proc_by_id(RunningState);
-        rproc.state = READY;
-        ReadyState.push_back(rproc.pid);
+        process_t *rproc = get_proc_by_id(RunningState);
+        rproc->state = READY;
+        ReadyState.push_back(rproc->pid);
         load_proc();
     }
 
     void block()
     {
-        process_t rproc = get_proc_by_id(RunningState);
-        rproc.state = BLOCKED;
-        if (rproc.priority > 0) rproc.priority--;
-        BlockedState.push_back(rproc.pid);
+        process_t *rproc = get_proc_by_id(RunningState);
+        rproc->state = BLOCKED;
+        if (rproc->priority > 0) rproc->priority--;
+        BlockedState.push_back(rproc->pid);
         load_proc();
     }
 
     void unblock()
     {
-        process_t bproc = get_proc_by_id(BlockedState.front());
+        process_t *bproc = get_proc_by_id(BlockedState.front());
         BlockedState.pop_front();
-        bproc.state = READY;
-        ReadyState.push_back(bproc.pid);
+        bproc->state = READY;
+        ReadyState.push_back(bproc->pid);
     }
 
     void print_current_state()
@@ -297,6 +298,7 @@ int main(int argc, char const *argv[]) {
                     break;
                 default:
                     status = mgrHandleInput(in);
+                    cout << "status = " << status << endl;
                     break;
             }
         }
