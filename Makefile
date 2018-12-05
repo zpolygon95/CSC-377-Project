@@ -10,4 +10,4 @@ clean:
 
 .PHONY: run
 run: bin/simulate
-	bin/simulate programs/file_0
+	cd programs; ../bin/simulate file_0
