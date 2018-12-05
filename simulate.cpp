@@ -65,6 +65,14 @@ process_t fork_proc(process_t *parent, int n, int cpu_time)
     return out;
 }
 
+void print_proc(process_t *proc)
+{
+    cout << proc->pid << "(" << proc->ppid << ") ";
+    cout << proc->file << "[" << proc->pc << "]: ";
+    cout << "STATE=" << proc->state << ",runt=" << proc->runt;
+    cout << ",slice=" << proc->slice << endl;
+}
+
 class instruction_t {
 public:
     char opcode;
@@ -101,8 +109,12 @@ public:
 
     void manage_proc(process_t *p)
     {
+        cout << "managing: ";
+        print_proc(p);
+        p->runt++;
         if (++p->slice >= (1 << p->priority))
         {
+            cout << "parking" << endl;
             if (p->priority < 3) p->priority++;
             park_proc();
         }
@@ -117,7 +129,8 @@ public:
         process_t child;
         int i;
         // evaluate instruction
-        cout << "tick: " << inst.opcode << endl;
+        print_proc(rproc);
+        cout << inst.opcode << endl;
         switch(inst.opcode)
         {
             case 'S':
@@ -150,9 +163,14 @@ public:
             case 'F':
                 // fork
                 child = fork_proc(rproc, inst.arg_int, current_time);
+                cout << "child pid: " << child.pid << endl;
                 PCBTable.push_back(child);
+                cout << "derp1" << endl;
                 ReadyState.push_back(child.pid);
+                cout << "derp2" << endl;
+                cout << rproc->pid << endl;
                 manage_proc(rproc);
+                cout << "derp3" << endl;
                 break;
             case 'R':
                 // replace
@@ -301,7 +319,6 @@ int main(int argc, char const *argv[]) {
                     break;
                 default:
                     status = mgrHandleInput(in);
-                    cout << "status = " << status << endl;
                     break;
             }
         }
