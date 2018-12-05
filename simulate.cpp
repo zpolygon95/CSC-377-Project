@@ -269,6 +269,7 @@ int main(int argc, char const *argv[]) {
     bool fast = (argc > 2) && (string(argv[2]) == "-f");
     string path(argv[1]);
     parse_files(path);
+    cpu = new CPU(path);
     // commander process
     pipe(pipefd);
     // spawn process manager
