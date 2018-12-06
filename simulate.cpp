@@ -104,7 +104,7 @@ public:
     {
         for (int i = 0; i < PCBTable.size(); i++)
             if (PCBTable[i].pid == pid) return &PCBTable[i];
-        // raise(Exception());
+        return NULL;
     }
 
     void manage_proc(process_t *p)
@@ -122,6 +122,8 @@ public:
         cout << "================================" << endl;
         // get next instruction
         process_t *rproc = get_proc_by_id(RunningState);
+        if (rproc == NULL)
+            return;
         instruction_t inst = files[rproc->file][rproc->pc++];
         vector<process_t>::iterator index;
         process_t child;
@@ -179,6 +181,8 @@ public:
     void load_proc()
     {
         process_t *rproc = get_proc_by_id(ReadyState.front());
+        if (rproc == NULL)
+            return;
         cout << "loading " << rproc->pid << endl;
         ReadyState.pop_front();
         rproc->slice = 0;
@@ -189,6 +193,8 @@ public:
     void park_proc()
     {
         process_t *rproc = get_proc_by_id(RunningState);
+        if (rproc == NULL)
+            return;
         cout << "parking " << rproc->pid << endl;
         rproc->state = READY;
         ReadyState.push_back(rproc->pid);
@@ -198,6 +204,8 @@ public:
     void block()
     {
         process_t *rproc = get_proc_by_id(RunningState);
+        if (rproc == NULL)
+            return;
         cout << "blocking " << rproc->pid << endl;
         rproc->state = BLOCKED;
         if (rproc->priority > 0) rproc->priority--;
@@ -208,6 +216,8 @@ public:
     void unblock()
     {
         process_t *bproc = get_proc_by_id(BlockedState.front());
+        if (bproc == NULL)
+            return;
         cout << "unblocking " << bproc->pid << endl;
         BlockedState.pop_front();
         bproc->state = READY;
