@@ -65,14 +65,6 @@ process_t fork_proc(process_t *parent, int n, int cpu_time)
     return out;
 }
 
-void print_proc(process_t *proc)
-{
-    cout << proc->pid << "(" << proc->ppid << ") ";
-    cout << proc->file << "[" << proc->pc << "]: ";
-    cout << "STATE=" << proc->state << ",runt=" << proc->runt;
-    cout << ",slice=" << proc->slice << ",priority=" << proc->priority << endl;
-}
-
 class instruction_t {
 public:
     char opcode;
@@ -119,7 +111,6 @@ public:
 
     void tick()
     {
-        cout << "================================" << endl;
         // get next instruction
         process_t *rproc = get_proc_by_id(RunningState);
         if (rproc == NULL)
@@ -129,8 +120,6 @@ public:
         process_t child;
         int i;
         // evaluate instruction
-        print_proc(rproc);
-        cout << inst.opcode << endl;
         switch(inst.opcode)
         {
             case 'S':
@@ -183,7 +172,6 @@ public:
         process_t *rproc = get_proc_by_id(ReadyState.front());
         if (rproc == NULL)
             return;
-        cout << "loading " << rproc->pid << endl;
         ReadyState.pop_front();
         rproc->slice = 0;
         rproc->state = RUNNING;
@@ -195,7 +183,6 @@ public:
         process_t *rproc = get_proc_by_id(RunningState);
         if (rproc == NULL)
             return;
-        cout << "parking " << rproc->pid << endl;
         rproc->state = READY;
         ReadyState.push_back(rproc->pid);
         load_proc();
@@ -206,7 +193,6 @@ public:
         process_t *rproc = get_proc_by_id(RunningState);
         if (rproc == NULL)
             return;
-        cout << "blocking " << rproc->pid << endl;
         rproc->state = BLOCKED;
         if (rproc->priority > 0) rproc->priority--;
         BlockedState.push_back(rproc->pid);
@@ -218,7 +204,6 @@ public:
         process_t *bproc = get_proc_by_id(BlockedState.front());
         if (bproc == NULL)
             return;
-        cout << "unblocking " << bproc->pid << endl;
         BlockedState.pop_front();
         bproc->state = READY;
         ReadyState.push_back(bproc->pid);
