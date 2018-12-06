@@ -53,7 +53,7 @@ process_t fork_proc(process_t *parent, int n, int cpu_time)
     process_t out;
     out.pid = next_pid++;
     out.ppid = parent->pid;
-    out.pc = parent->pc + 1;
+    out.pc = parent->pc;
     parent->pc += n;
     out.file = parent->file;
     out.value = parent->value;
