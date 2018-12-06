@@ -70,7 +70,7 @@ void print_proc(process_t *proc)
     cout << proc->pid << "(" << proc->ppid << ") ";
     cout << proc->file << "[" << proc->pc << "]: ";
     cout << "STATE=" << proc->state << ",runt=" << proc->runt;
-    cout << ",slice=" << proc->slice << endl;
+    cout << ",slice=" << proc->slice << ",priority=" << proc->priority << endl;
 }
 
 class instruction_t {
@@ -109,12 +109,9 @@ public:
 
     void manage_proc(process_t *p)
     {
-        cout << "managing: ";
-        print_proc(p);
         p->runt++;
         if (++p->slice >= (1 << p->priority))
         {
-            cout << "parking" << endl;
             if (p->priority < 3) p->priority++;
             park_proc();
         }
@@ -122,6 +119,7 @@ public:
 
     void tick()
     {
+        cout << "================================" << endl;
         // get next instruction
         process_t *rproc = get_proc_by_id(RunningState);
         instruction_t inst = files[rproc->file][rproc->pc++];
@@ -163,14 +161,9 @@ public:
             case 'F':
                 // fork
                 child = fork_proc(rproc, inst.arg_int, current_time);
-                cout << "child pid: " << child.pid << endl;
                 PCBTable.push_back(child);
-                cout << "derp1" << endl;
                 ReadyState.push_back(child.pid);
-                cout << "derp2" << endl;
-                cout << rproc->pid << endl;
                 manage_proc(rproc);
-                cout << "derp3" << endl;
                 break;
             case 'R':
                 // replace
@@ -185,6 +178,7 @@ public:
     void load_proc()
     {
         process_t *rproc = get_proc_by_id(ReadyState.front());
+        cout << "loading " << rproc->pid << endl;
         ReadyState.pop_front();
         rproc->slice = 0;
         rproc->state = RUNNING;
@@ -193,6 +187,7 @@ public:
     void park_proc()
     {
         process_t *rproc = get_proc_by_id(RunningState);
+        cout << "parking " << rproc->pid << endl;
         rproc->state = READY;
         ReadyState.push_back(rproc->pid);
         load_proc();
@@ -201,6 +196,7 @@ public:
     void block()
     {
         process_t *rproc = get_proc_by_id(RunningState);
+        cout << "blocking " << rproc->pid << endl;
         rproc->state = BLOCKED;
         if (rproc->priority > 0) rproc->priority--;
         BlockedState.push_back(rproc->pid);
@@ -210,6 +206,7 @@ public:
     void unblock()
     {
         process_t *bproc = get_proc_by_id(BlockedState.front());
+        cout << "unblocking " << bproc->pid << endl;
         BlockedState.pop_front();
         bproc->state = READY;
         ReadyState.push_back(bproc->pid);
