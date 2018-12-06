@@ -162,9 +162,9 @@ public:
             case 'F':
                 // fork
                 child = fork_proc(rproc, inst.arg_int, current_time);
+                manage_proc(rproc);
                 PCBTable.push_back(child);
                 ReadyState.push_back(child.pid);
-                manage_proc(rproc);
                 break;
             case 'R':
                 // replace
