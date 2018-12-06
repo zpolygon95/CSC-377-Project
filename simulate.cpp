@@ -157,6 +157,7 @@ public:
                     if (PCBTable[i].pid == rproc->pid) break;
                 index += i;
                 PCBTable.erase(index);
+                load_proc();
                 break;
             case 'F':
                 // fork
@@ -182,6 +183,7 @@ public:
         ReadyState.pop_front();
         rproc->slice = 0;
         rproc->state = RUNNING;
+        RunningState = rproc->pid;
     }
 
     void park_proc()
