@@ -119,7 +119,6 @@ public:
 
     void tick()
     {
-        cout << "================================" << endl;
         // get next instruction
         process_t *rproc = get_proc_by_id(RunningState);
         instruction_t inst = files[rproc->file][rproc->pc++];
@@ -128,7 +127,6 @@ public:
         int i;
         // evaluate instruction
         print_proc(rproc);
-        cout << inst.opcode << endl;
         switch(inst.opcode)
         {
             case 'S':
@@ -179,7 +177,6 @@ public:
     void load_proc()
     {
         process_t *rproc = get_proc_by_id(ReadyState.front());
-        cout << "loading " << rproc->pid << endl;
         ReadyState.pop_front();
         rproc->slice = 0;
         rproc->state = RUNNING;
@@ -189,7 +186,6 @@ public:
     void park_proc()
     {
         process_t *rproc = get_proc_by_id(RunningState);
-        cout << "parking " << rproc->pid << endl;
         rproc->state = READY;
         ReadyState.push_back(rproc->pid);
         load_proc();
@@ -198,7 +194,6 @@ public:
     void block()
     {
         process_t *rproc = get_proc_by_id(RunningState);
-        cout << "blocking " << rproc->pid << endl;
         rproc->state = BLOCKED;
         if (rproc->priority > 0) rproc->priority--;
         BlockedState.push_back(rproc->pid);
@@ -208,7 +203,6 @@ public:
     void unblock()
     {
         process_t *bproc = get_proc_by_id(BlockedState.front());
-        cout << "unblocking " << bproc->pid << endl;
         BlockedState.pop_front();
         bproc->state = READY;
         ReadyState.push_back(bproc->pid);
