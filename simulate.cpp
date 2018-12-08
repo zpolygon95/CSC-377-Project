@@ -245,6 +245,7 @@ public:
         }
 
         cout << "********************************************************************************" << endl;
+    }
 
     CPU(string init)
     {
@@ -295,7 +296,7 @@ int mgrHandleInput(char input)
         case 'T':
             return 0;
         case 'P':
-            printReport();
+            cpu->print_current_state();
             return 1;
         default:
             return 1;
