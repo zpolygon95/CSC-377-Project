@@ -2,99 +2,46 @@
 
 Members: Zachary Polikarpus, Jordan VanDusen, Nickxit Bhardwaj
 
-## Tasks ##
+## Building ##
 
-Simulate a process management system
+Requires `make` of some sort, `g++`, and a POSIX environment. On Windows, the
+Linux subsytem will do. To build without running, make the default target
 
-+ [x] Commander Process: Start Simulation
-    + [x] Create Pipe
-    + [x] Spawn Process Manager
-    + [x] Read one command per second from STDIN
+```
+$ make
+```
 
-+ [ ] Process Manager:
-    + [ ] Simulate process functions
-        + [ ] creation
-        + [ ] replacement
-        + [ ] state transitions
-        + [ ] scheduling
-        + [ ] context switching
-    + [ ] Data structures
-        + [x] Time: Integer intialized to 0
-        + [x] PCBTable: one entry for every process that hasn't finished yet
-            + [x] process id
-            + [x] parent process id
-            + [x] pointer to program counter value (initially 0)
-            + [x] integer value
-            + [x] priority
-            + [x] state
-            + [x] start time
-            + [x] run time (time used so far)
-        + [x] ReadyState: stores all simulated process that are ready to run
-        + [x] BlockedState: stores all simulated process that are blocked
-        + [x] RunningState: stores PCBTable index of currently running process
-    + [ ] Processing input commands
-        + [x] Get commands from pipe
-            + [ ] Q: tick
-                + [ ] Execute next instruction of currently running process
-                + [ ] Increment PC (except for F & R instructions)
-                + [ ] Increment Time
-                + [ ] Perform scheduling
-            + [ ] U: Move first process in "blocked" queue to "ready"
-            + [ ] P: spawn new reporter process
-            + [x] T: terminate
-                + [x] Spawn reporter process
-                + [x] terminate
-            + [ ] Ensure only one reporter process is running
-    + [ ] Executing simulated processes
-        + [ ] S n, A n, D n: update value stored in CPU (Set, Add, Subtract)
-        + [ ] B: block current process
-            + [ ] move running process to "blocked" queue
-            + [ ] "ready" to "running"
-            + [ ] (context switch)
-        + [ ] E: terminate running process
-            + [ ] free memory
-            + [ ] move from "ready" to "running"
-            + [ ] (context switch)
-        + [ ] F n: create new simulated process
-            + [ ] create new entry in PCBTable
-            + [ ] assign unique PID
-            + [ ] assign running PID to PPID
-            + [ ] set start time to current time
-            + [ ] set run time to 0
-            + [ ] program array and integer copied from parent
-            + [ ] priority same as parent
-            + [ ] PC of new process 1 + parent PC
-            + [ ] PC of parent process set to n + parent PC
-            + [ ] new process queued in ready
-        + [ ] R filename: replace running process image
-            + [ ] program array overwritten by code in filename
-            + [ ] PC set to 0
-            + [ ] integer value undefined
-            + [ ] All else remains the same
-    + [ ] Scheduling:
-        + [ ] multiple queues with priority classes
-        + [ ] 4 priority classes 0-3 (0 highest priority)
-        + [ ] initial process given priority 0
-        + [ ] quantum size depends on priority
-            + [ ] priority 0 = 1 unit
-            + [ ] priority 1 = 2 unit
-            + [ ] priority 2 = 4 unit
-            + [ ] priority 3 = 8 unit
-        + [ ] If a running process uses it's time slice completely, it is preempted
-          and it's priority is lowered
-        + [ ] If a process blocks before it's quantum expires, it's priority is
-          raised.
-    + [ ] Context switching: Swap process states in and out of the CPU and PCBTable
+To build and run with the example set of programs, make the `run` target
 
-+ [ ] Reporter Process: Print the current state of the system, then terminate
-  + [ ] Current System Time
-  + [ ] Information about currently running process
-      + [ ] PID
-      + [ ] PPID
-      + [ ] priority
-      + [ ] value
-      + [ ] start time
-      + [ ] run time
-  + [ ] List of Blocked Processes (as above)
-  + [ ] List of Ready Processes (as above)
-      + [ ] Separated by priority
+```
+$ make run
+```
+
+## Running ##
+
+The program accepts one necessary and one optional command line argument. The
+necessary first argument is the name of the initial program file to simulate.
+The optional second argument is a flag that prevents the program from sleeping
+for a second between input symbols (as dictated by the specification).
+
+```
+$ bin/simulate <program> [-f]
+```
+
+Once the program starts, the symbols read from STDIN control the flow of the
+simulation. In order to facilitiate efficient testing, unrecognized symbols
+(such as a line-feed character) are quietly ignored.
+
+Recognized symbols are:
++ Q: Advance the state of the simulation
++ U: Unblock the first process on the "blocked" queue
++ P: Print the current state of the simulation
++ T: Terminate the simulation
+
+Please note that, due to the specification's insistence that the
+"manager process" had to receive communications from the "commander process" via
+a pipe, there is no way for the manager process to inform the commander process
+that it has completed successfully. Therefore, the commander process must be
+terminated by sending an EOF (ctrl-D in a POSIX shell) after terminating the
+manager process with a T. Alternatively, a file of commands can be piped to
+STDIN; in which case the EOF is sent when the end of the input file is reached.
