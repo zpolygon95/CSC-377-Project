@@ -209,10 +209,42 @@ public:
         ReadyState.push_back(bproc->pid);
     }
 
+    void print_proc(process_t *proc, bool p)
+    {
+        cout << proc->pid << ", ";
+        cout << proc->ppid << ", ";
+        if (p)
+            cout << proc->priority << ", ";
+        cout << proc->value << ", ";
+        cout << proc->startt << ", ";
+        cout << proc->runt << endl;
+    }
+
     void print_current_state()
     {
-        // TODO
-    }
+        cout << "********************************************************************************" << endl;
+        cout << "The current system state is as follows:" << endl;
+        cout << "********************************************************************************" << endl;
+        cout << "CURRENT TIME: " << current_time << endl << endl;
+        cout << "RUNNING PROCESS:" << endl;
+        print_proc(get_proc_by_id(RunningState), true);
+        cout << endl << "BLOCKED PROCESSES:" << endl;
+        for (int i = 0; i < BlockedState.size(); i++)
+            print_proc(get_proc_by_id(BlockedState[i]), true);
+        cout << endl << "PROCESSES READY TO EXECUTE:" << endl;
+        for (int i = 0; i < 4; i++)
+        {
+            cout << "Queue of processes with priority " << i << ":" << endl;
+            for (int j = 0; j < ReadyState.size(); j++)
+            {
+                process_t *proc = get_proc_by_id(ReadyState[j]);
+                if (proc->priority == i)
+                    print_proc(proc, false);
+            }
+            cout << endl;
+        }
+
+        cout << "********************************************************************************" << endl;
 
     CPU(string init)
     {
@@ -251,14 +283,8 @@ void parse_files(string file)
     }
 }
 
-void printReport()
-{
-    // TODO: print report
-}
-
 int mgrHandleInput(char input)
 {
-    int out = 1;
     switch (input) {
         case 'Q':
             cpu->tick();
@@ -267,10 +293,10 @@ int mgrHandleInput(char input)
             cpu->unblock();
             return 1;
         case 'T':
-            out = 0;
+            return 0;
         case 'P':
             printReport();
-            return out;
+            return 1;
         default:
             return 1;
     }
