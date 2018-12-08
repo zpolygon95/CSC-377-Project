@@ -114,7 +114,10 @@ public:
         // get next instruction
         process_t *rproc = get_proc_by_id(RunningState);
         if (rproc == NULL)
+        {
+            load_proc();
             return;
+        }
         instruction_t inst = files[rproc->file][rproc->pc++];
         vector<process_t>::iterator index;
         process_t child;
@@ -171,7 +174,10 @@ public:
     {
         process_t *rproc = get_proc_by_id(ReadyState.front());
         if (rproc == NULL)
+        {
+            RunningState = -1;
             return;
+        }
         ReadyState.pop_front();
         rproc->slice = 0;
         rproc->state = RUNNING;
@@ -211,6 +217,8 @@ public:
 
     void print_proc(process_t *proc, bool p)
     {
+        if (proc == NULL)
+            return;
         cout << proc->pid << ", ";
         cout << proc->ppid << ", ";
         if (p)
